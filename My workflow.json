@@ -1,0 +1,299 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "1cb3e276-ff13-49e2-a426-6ab090ddfc0c",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dPdKMx4AAJ6z8MKn",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a professional email assistant.\n\nAnalyze this email and respond in JSON format only:\n{\n  \"category\": \"Inquiry/Complaint/Spam/General\",\n  \"priority\": \"High/Medium/Low\",\n  \"reply\": \"your drafted reply here\",\n  \"subject\": \"Re: [original subject here]\",\n  \"tone\": \"formal/informal\"\n}\n\nRules:\n- Replace [original subject here] with the actual subject\n- Never use placeholders like {{ }} in your reply\n- Sign off as \"Team Monika\"\n- Keep replies under 100 words\n- If spam, set category as Spam and reply as \"no_reply\"\n\nEmail Subject: {{ $json.subject }}\nEmail From: {{ $json.from }}\nEmail Body: {{ $json.text }}\n- Extract sender name from: {{ $json.from }}\n- If from field is \"Monika Jakkamsetty <email>\" use \"Monika\"\n- If no name found, start with \"Dear Sir/Madam\"\n- NEVER make up a name",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        0
+      ],
+      "id": "d329f03b-9834-40e3-b211-03934cfa3df2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        240
+      ],
+      "id": "a23785b8-7dcc-459e-a003-e62b36eec61b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SrRvnamZVoMoyXGq",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "={{ $json.reply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "1b90ee7f-52ee-4a30-8cd6-29b32a946acd",
+      "name": "Reply to a message",
+      "webhookId": "2ae2297d-ec32-40a0-b630-89be5b98c887",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dPdKMx4AAJ6z8MKn",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce19967b-a456-4782-a985-6d0b790ab915",
+              "name": "category",
+              "value": "={{ JSON.parse($json.output.replace(/```json/g, '').replace(/```/g, '').trim()).category }}",
+              "type": "string"
+            },
+            {
+              "id": "456cdd42-1aee-44ec-9534-75992943314a",
+              "name": "reply",
+              "value": "={{ JSON.parse($json.output.replace(/```json/g, '').replace(/```/g, '').trim()).reply }}",
+              "type": "string"
+            },
+            {
+              "id": "6674878c-d90f-4467-8ee1-806c81ed324a",
+              "name": "subject",
+              "value": "={{ JSON.parse($json.output.replace(/```json/g, '').replace(/```/g, '').trim()).subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        0
+      ],
+      "id": "701df45f-0680-4a9f-9a4c-9421d6d0ddae",
+      "name": "clean output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f6bcf87-ad60-46c7-be41-279a9ab270eb",
+              "name": "subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "808d28cd-c726-44cd-ab1f-bafdeb9f531f",
+              "name": "from",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "9aefcae7-b42c-4dbd-81bd-680d36d8e024",
+              "name": "text",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        0
+      ],
+      "id": "05745390-61db-4633-bda8-777efcf2c5a9",
+      "name": "read content"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7677dc28-1372-45c2-986a-116ce0ad9f4b",
+              "name": "reply",
+              "value": "={{ $json.reply }}",
+              "type": "string"
+            },
+            {
+              "id": "5336ba2f-f83c-41b4-a840-81c99d67e307",
+              "name": "to",
+              "value": "={{ $('Gmail Trigger').item.json.To }}",
+              "type": "string"
+            },
+            {
+              "id": "0dddafff-f013-495e-bb3e-89c2e90e553c",
+              "name": "subject",
+              "value": "={{ $('Gmail Trigger').item.json.Subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        0
+      ],
+      "id": "9def8558-5b41-41d1-96c8-296db0cb4545",
+      "name": "write reply"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Gmail Trigger').item.json.threadId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        240
+      ],
+      "id": "366c0c5a-3d6f-4f32-9878-0222053b465b",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "read content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "clean output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean output": {
+      "main": [
+        [
+          {
+            "node": "write reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read content": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write reply": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b5179108-cbb4-4d56-9155-31549b40fd08",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7bacc61e7451d3cc737a4dd99af4e5d2eba75600c4db2a6c67120edf04ab09e0"
+  },
+  "id": "YqtEMMZP52S71pTh",
+  "tags": []
+}
