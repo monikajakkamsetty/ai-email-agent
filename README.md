@@ -25,5 +25,8 @@ Gmail Trigger → Read Content → AI Agent → Clean Output → Write Reply →
 3. Add Google Gemini API key
 4. Activate the workflow
 
+## Workflow Screenshot
+![AI Email Agent Workflow](screenshot.png)
+
 ## Author
 Monika Jakkamsetty
