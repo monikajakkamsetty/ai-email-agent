@@ -26,7 +26,7 @@ Gmail Trigger → Read Content → AI Agent → Clean Output → Write Reply →
 4. Activate the workflow
 
 ## Workflow Screenshot
-![AI Email Agent Workflow](Screenshot 2026-05-21 121136.png)
+![AI Email Agent Workflow](Screenshot.png)
 
 ## Author
 Monika Jakkamsetty
