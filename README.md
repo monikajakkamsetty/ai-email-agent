@@ -18,6 +18,7 @@ reads, classifies, and replies to emails using AI.
 
 ## Workflow
 Gmail Trigger → Read Content → AI Agent → Clean Output → Write Reply → Send Reply
+
 https://github.com/monikajakkamsetty/ai-email-agent/blob/main/Screenshot%202026-05-21%20121136.png
 
 ## Setup
